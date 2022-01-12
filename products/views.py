@@ -7,7 +7,7 @@ from rest_framework import serializers, viewsets
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id', 'name', 'category', 'price', 'is_available')
+        fields = ('id', 'name', 'category', 'price', 'isAvailable')
         
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
