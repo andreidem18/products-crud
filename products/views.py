@@ -16,6 +16,11 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset().filter(created_by=get_client_ip(request))
+        serialized = ProductSerializer(queryset, many=True)
+        return Response(serialized.data)
+
     def create(self, request, *args, **kwargs):
         product = Product.objects.create(
             name=request.data['name'],
