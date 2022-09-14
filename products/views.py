@@ -11,6 +11,12 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ('id', 'name', 'category', 'price', 'isAvailable')
+
+
+class CreateProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'category', 'price', 'isAvailable', 'created_by')
         
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
@@ -22,12 +28,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(serialized.data)
 
     def create(self, request, *args, **kwargs):
-        product = Product.objects.create(
-            name=request.data['name'],
-            category=request.data['category'],
-            price=request.data['price'],
-            isAvailable=request.data['isAvailable'],
-            created_by=get_client_ip(request)
-        )
-        serialized = ProductSerializer(product)
-        return Response(status = status.HTTP_201_CREATED, data = serialized.data)
+        request.data['created_by']=get_client_ip(request)
+        serialized = CreateProductSerializer(data=request.data)
+        if not serialized.is_valid():
+            return Response(status = status.HTTP_400_BAD_REQUEST, data = serialized.errors)
+        else:
+            serialized.save()
+            serialized = ProductSerializer(serialized.data)
+            return Response(status = status.HTTP_201_CREATED, data = serialized.data)
